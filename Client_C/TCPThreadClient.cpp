@@ -7,13 +7,12 @@ char* SERVERIP = (char*)"127.0.0.1";
 #define BUFSIZE    512
 #define NAMESIZE   16
 
-int retval;
-
 unsigned int WINAPI ThreadSend(void* arg) {
 	SOCKET sock = *((SOCKET**)arg)[0];
 	char* name = ((char**)arg)[1];
 	int len;
 	char buf[BUFSIZE + 1];
+	int retval;
 
 	while (1) {
 		// 데이터 입력
@@ -24,15 +23,15 @@ unsigned int WINAPI ThreadSend(void* arg) {
 		len = (int)strlen(buf);
 		if (buf[len - 1] == '\n')
 			buf[len - 1] = '\0';
-		if (strlen(buf) == 0)
-			break;
 
 		// 데이터 보내기
 		retval = send(sock, buf, (int)strlen(buf), 0);
 		if (retval == SOCKET_ERROR) {
 			err_display("send()");
 			break;
-		}
+		} else if (retval == 0)
+			break;
+
 		printf("[%s] %s\n", name, buf);
 	}
 }
@@ -41,11 +40,12 @@ unsigned int WINAPI ThreadRecv(void* arg) {
 	SOCKET sock = *((SOCKET**)arg)[0];
 	char* name = ((char**)arg)[1];
 	char buf[BUFSIZE + 1];
+	int retval;
 	
 	while (1)
 	{
 		// 데이터 받기
-		retval = recv(sock, buf, retval, MSG_WAITALL);
+		retval = recv(sock, buf, (int)strlen(buf), MSG_WAITALL);
 		if (retval == SOCKET_ERROR) {
 			err_display("recv()");
 			break;
@@ -67,33 +67,33 @@ void setName(char* name, int buffer_size, SOCKET sock) {
 	while (1) {
 		printf("\n닉네임을 입력하세요 : ");
 		if (fgets(name, buffer_size, stdin) != NULL) {
-			printf("\n[오류] fgets 결과값이 NULL입니다.");
-			break;
+			// '\n' 문자 제거
+			len = (int)strlen(name);
+			if (name[len - 1] == '\n')
+				name[len - 1] = '\0';
+			if (strlen(name) == 0) {
+				printf("\n[오류] 공백을 닉네임으로 설정할 수 없습니다.");
+			}
+
+			retval = send(sock, name, (int)strlen(name), 0);
+			if (retval == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+			retval = recv(sock, check, 1, 0);
+			if (retval == SOCKET_ERROR) {
+				err_display("recv()");
+				break;
+			}
+			else if (check[0] == 'n')
+				printf("\n[중복되는 닉네임]");
+			else {
+				break;
+			}
 		}
 
-		// '\n' 문자 제거
-		len = (int)strlen(name);
-		if (name[len - 1] == '\n')
-			name[len - 1] = '\0';
-		if (strlen(name) == 0) {
-			printf("\n[오류] 공백을 닉네임으로 설정할 수 없습니다.");
-		}
-
-		retval = send(sock, name, (int)strlen(name), 0);
-		if (retval == SOCKET_ERROR) {
-			err_display("send()");
-			break;
-		}
-		retval = recv(sock, check, buffer_size, 0);
-		if (retval == SOCKET_ERROR) {
-			err_display("recv()");
-			break;
-		}
-		else if (check[0] == 'n')
-			printf("\n[중복되는 닉네임]");
-		else {
-			break;
-		}
+		printf("\n[오류] fgets 결과값이 NULL입니다.");
+		break;
 
 	}
 }
