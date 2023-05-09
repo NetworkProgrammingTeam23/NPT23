@@ -1,11 +1,11 @@
 #include "Common.h"
 #include <windows.h>
 #include <process.h>
-//원하는 ip로 변경해서 사용
+
 char* SERVERIP = (char*)"127.0.0.1";
 #define SERVERPORT 9900
 #define BUFSIZE    1024
-#define NAMESIZE   16
+#define NAMESIZE   1024
 
 unsigned int WINAPI ThreadSend(void* arg) {
 	SOCKET sock = *((SOCKET**)arg)[0];
@@ -29,8 +29,7 @@ unsigned int WINAPI ThreadSend(void* arg) {
 		if (retval == SOCKET_ERROR) {
 			err_display("send()");
 			break;
-		}
-		else if (retval == 0)
+		} else if (strcmp(buf, "quit") == 0)
 			break;
 
 		printf("[%s] %s\n", name, buf);
@@ -42,11 +41,11 @@ unsigned int WINAPI ThreadRecv(void* arg) {
 	char* name = ((char**)arg)[1];
 	char buf[BUFSIZE + 1];
 	int retval;
-
+	
 	while (1)
 	{
 		// 데이터 받기
-		retval = recv(sock, buf, sizeof(buf), 0);
+		retval = recv(sock, buf, (int)strlen(buf), MSG_WAITALL);
 		if (retval == SOCKET_ERROR) {
 			err_display("recv()");
 			break;
@@ -56,7 +55,6 @@ unsigned int WINAPI ThreadRecv(void* arg) {
 
 		// 받은 데이터 출력
 		buf[retval] = '\0';
-
 		printf("[받은 데이터] %s\n", buf);
 	}
 }
@@ -68,33 +66,24 @@ void setName(char* name, int buffer_size, SOCKET sock) {
 
 	while (1) {
 		printf("\n닉네임을 입력하세요 : ");
-		if (fgets(name, buffer_size, stdin) != NULL) {
-			// '\n' 문자 제거
-			len = (int)strlen(name);
-			if (name[len - 1] == '\n')
-				name[len - 1] = '\0';
-			if (strlen(name) == 0) {
-				printf("\n[오류] 공백을 닉네임으로 설정할 수 없습니다.");
-			}
-
-			retval = send(sock, name, (int)strlen(name), 0);
-			if (retval == SOCKET_ERROR) {
-				err_display("send()");
-				break;
-			}
-			retval = recv(sock, check, 1, 0);
-			if (retval == SOCKET_ERROR) {
-				err_display("recv()");
-				break;
-			}
-			else if (check[0] == 'n')
-				printf("\n[중복되는 닉네임]");
-			else {
-				break;
-			}
+		if (fgets(name, buffer_size, stdin) == NULL) {
+			printf("\n[오류] fgets 결과값이 NULL입니다.");
+			break;
 		}
 
-		printf("\n[오류] fgets 결과값이 NULL입니다.");
+		// '\n' 문자 제거
+		len = (int)strlen(name);
+		if (name[len - 1] == '\n')
+			name[len - 1] = '\0';
+		if (strlen(name) == 0) {
+			printf("\n[오류] 공백을 닉네임으로 설정할 수 없습니다.");
+		}
+
+		retval = send(sock, name, (int)strlen(name), 0);
+		if (retval == SOCKET_ERROR) {
+			err_display("send()");
+			break;
+		}
 		break;
 
 	}
