@@ -1,10 +1,10 @@
 #include "Common.h"
 #include <windows.h>
 #include <process.h>
-
+//원하는 ip로 변경해서 사용
 char* SERVERIP = (char*)"127.0.0.1";
-#define SERVERPORT 9360
-#define BUFSIZE    512
+#define SERVERPORT 9900
+#define BUFSIZE    1024
 #define NAMESIZE   16
 
 unsigned int WINAPI ThreadSend(void* arg) {
@@ -29,7 +29,8 @@ unsigned int WINAPI ThreadSend(void* arg) {
 		if (retval == SOCKET_ERROR) {
 			err_display("send()");
 			break;
-		} else if (retval == 0)
+		}
+		else if (retval == 0)
 			break;
 
 		printf("[%s] %s\n", name, buf);
@@ -41,11 +42,11 @@ unsigned int WINAPI ThreadRecv(void* arg) {
 	char* name = ((char**)arg)[1];
 	char buf[BUFSIZE + 1];
 	int retval;
-	
+
 	while (1)
 	{
 		// 데이터 받기
-		retval = recv(sock, buf, (int)strlen(buf), MSG_WAITALL);
+		retval = recv(sock, buf, sizeof(buf), 0);
 		if (retval == SOCKET_ERROR) {
 			err_display("recv()");
 			break;
@@ -55,6 +56,7 @@ unsigned int WINAPI ThreadRecv(void* arg) {
 
 		// 받은 데이터 출력
 		buf[retval] = '\0';
+
 		printf("[받은 데이터] %s\n", buf);
 	}
 }
