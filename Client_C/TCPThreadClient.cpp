@@ -1,22 +1,25 @@
 #include "Common.h"
-#include <windows.h>
 #include <process.h>
+#include <windows.h>
+
+
+#pragma comment(lib, "ws2_32") 
 
 char* SERVERIP = (char*)"127.0.0.1";
 #define SERVERPORT 9900
-#define BUFSIZE    1024
-#define NAMESIZE   1024
+#define BUFSIZE    1023
+#define NAMESIZE   1023
+
 
 unsigned int WINAPI ThreadSend(void* arg) {
-	SOCKET sock = *((SOCKET**)arg)[0];
-	char* name = ((char**)arg)[1];
+	SOCKET sock = *(SOCKET*)arg;
 	int len;
 	char buf[BUFSIZE + 1];
 	int retval;
 
 	while (1) {
+
 		// 데이터 입력
-		printf("\n[보낼 데이터] ");
 		if (fgets(buf, BUFSIZE + 1, stdin) == NULL)
 			break;
 
@@ -29,40 +32,41 @@ unsigned int WINAPI ThreadSend(void* arg) {
 		if (retval == SOCKET_ERROR) {
 			err_display("send()");
 			break;
-		} else if (strcmp(buf, "quit") == 0)
-			break;
+		}
+		else if (strcmp(buf, "quit") == 0) {
+			printf("\n서버 접속 종료");
+			exit(0);
+		}
 
-		printf("[%s] %s\n", name, buf);
+		Sleep(1000);
 	}
 }
 
 unsigned int WINAPI ThreadRecv(void* arg) {
-	SOCKET sock = *((SOCKET**)arg)[0];
-	char* name = ((char**)arg)[1];
+	SOCKET sock = *(SOCKET*)arg;
 	char buf[BUFSIZE + 1];
 	int retval;
 	
 	while (1)
 	{
+
 		// 데이터 받기
-		retval = recv(sock, buf, (int)strlen(buf), MSG_WAITALL);
+		retval = recv(sock, buf, (int)strlen(buf), 0);
 		if (retval == SOCKET_ERROR) {
 			err_display("recv()");
 			break;
 		}
-		else if (retval == 0)
-			break;
 
 		// 받은 데이터 출력
 		buf[retval] = '\0';
-		printf("[받은 데이터] %s\n", buf);
+		printf("%s", buf);
 	}
 }
 
 void setName(char* name, int buffer_size, SOCKET sock) {
 	int retval;
 	int len;
-	char check[1];
+	char check[NAMESIZE+1];
 
 	while (1) {
 		printf("\n닉네임을 입력하세요 : ");
@@ -79,7 +83,7 @@ void setName(char* name, int buffer_size, SOCKET sock) {
 			printf("\n[오류] 공백을 닉네임으로 설정할 수 없습니다.");
 		}
 
-		retval = send(sock, name, (int)strlen(name), 0);
+		retval = send(sock, name, len, 0);
 		if (retval == SOCKET_ERROR) {
 			err_display("send()");
 			break;
@@ -123,13 +127,10 @@ int main(int argc, char* argv[])
 	HANDLE sendThread;
 	unsigned recvThreadID;
 	unsigned sendThreadID;
-	void* socketAndName[2];
-	socketAndName[0] = &sock;
-	socketAndName[1] = name;
 
 	//스레드 생성
-	recvThread = (HANDLE)_beginthreadex(NULL, 0, ThreadRecv, &socketAndName, 0, &recvThreadID);
-	sendThread = (HANDLE)_beginthreadex(NULL, 0, ThreadSend, &socketAndName, 0, &sendThreadID);
+	recvThread = (HANDLE)_beginthreadex(NULL, 0, ThreadRecv, &sock, 0, &recvThreadID);
+	sendThread = (HANDLE)_beginthreadex(NULL, 0, ThreadSend, &sock, 0, &sendThreadID);
 
 	// main 이 종료되면 두 스레드도 강제 종료되므로 무한 대기하게 한다
 	WaitForSingleObject(recvThread, INFINITE);
