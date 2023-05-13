@@ -51,23 +51,8 @@ def recv_msg(sock):
                 newsoc = clients[a-1]
                 send_to_all('{}이(가) 나갔습니다.'.format(outid))
             break
-ip = '127.0.0.1'
-port = 9900
 
-listeningSock = socket(AF_INET, SOCK_STREAM)
-listeningSock.bind((ip, port))
-listeningSock.listen(10)
-print("접속을 환영합니다.")
-
-send_all=threading.Thread(target=send_message)
-send_all.start()
-
-
-clients=[]
-nicknames = []
-user_list = {}
-while True:
-    serviceSock, addr = listeningSock.accept()
+def handle_client(serviceSock, addr):
     print(str(addr), '에서 접속되었습니다.')
     while True:
         nickname = serviceSock.recv(1024).decode('euc-kr')
@@ -84,3 +69,22 @@ while True:
 
     recv_thread = threading.Thread(target=recv_msg, args=(serviceSock,))
     recv_thread.start()
+    
+ip = '127.0.0.1'
+port = 9900
+
+listeningSock = socket(AF_INET, SOCK_STREAM)
+listeningSock.bind((ip, port))
+listeningSock.listen(10)
+print("접속을 환영합니다.")
+
+send_all=threading.Thread(target=send_message)
+send_all.start()
+
+clients=[]
+nicknames = []
+user_list = {}
+while True:
+    serviceSock, addr = listeningSock.accept()
+    client_thread = threading.Thread(target=handle_client, args=(serviceSock, addr))
+    client_thread.start()
