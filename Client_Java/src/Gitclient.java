@@ -6,7 +6,7 @@ public class Gitclient {
     private static boolean clientRunning = true;
 
     public static void main(String[] args) throws IOException {
-        String serverName = "127.0.0.1";
+        String serverName = "211.184.37.187";
         int port = 9900;
         try {
             System.out.println("Connecting to " + serverName + " on port " + port);

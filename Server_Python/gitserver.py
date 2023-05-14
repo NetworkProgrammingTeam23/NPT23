@@ -2,7 +2,7 @@ from socket import *
 import time
 import threading
 import sys
-import asyncio
+import os
 def send_to_all(msg):
     if not clients:  # 클라이언트가 없는 경우
         print("접속자가 없습니다.")
@@ -19,19 +19,21 @@ def off(sock):
 
 def send_message():
     while True:
-        msg = input()
-        if(msg=="quit"):
-            global server_running
-            server_running = False
-            send_to_all("서버가 종료됩니다.")  # 서버 종료 알림 메시지를 전송
-            # time.sleep(2)  # 메시지를 보낸 후에 2초 대기
-            for client in clients:  # 모든 클라이언트 소켓을 닫음
-                client.close()
-            listeningSock.close()  # 서버 소켓을 닫음
-            sys.exit()
-        else:
-            send_to_all(msg)
-
+        try:
+            msg = input()
+            if(msg=="quit"):
+                global server_running
+                server_running = False
+                send_to_all("서버가 종료됩니다.")  # 서버 종료 알림 메시지를 전송
+                # time.sleep(2)  # 메시지를 보낸 후에 2초 대기
+                for client in clients:  # 모든 클라이언트 소켓을 닫음
+                    client.close()
+                listeningSock.close()  # 서버 소켓을 닫음
+                sys.exit()
+            else:
+                send_to_all(msg)
+        except ConnectionAbortedError:
+            os._exit(0)
 # def outid_message(outid):
 #     send_to_all('{}이(가) 나갔습니다.'.format(outid))
 
