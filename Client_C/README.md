@@ -14,17 +14,9 @@
 6. ~~recv()로 받아오면 점차 문장이 짤려서 옴~~<br>
 	5번과 연관된 문제같음. recv 이후 buf에 저장된 데이터를 print해줄 때 printf("%s\n", buf);를 하면 지멋대로 끊어서 바이트를 가져와서 글도 ?로 일관되게 깨지고 난리도 아님<br>
 	+) 어느 시점부터 recv가 제대로 작동하지 않는 듯함.
-7. msg = '[{}] {} : {}'.format(time.strftime('%X'), user_list[sock][0], recvData.decode('euc-kr'))에서 recvData.decode('euc-kr')만 못받음<br>
-	5, 6번을 해결하니 새로운 문제 발생. 5, 6번보다 확실하고 뚜렷하게 증상이 나타나지만, 더 고쳐지지 않음.<br>
-	심지어 c 클라이언트에서 보낸 메세지만 기가막히게 구별해서 못 받음<br>
-	파이썬 클라이언트에서 보낸 메세지는 제대로 받음<br>
-	아래는 지금까지 써본 방법과 작동 결과를 담은 캡처본.
-	- 현재 인코딩 euc-k로 변경
-	- recvn() 사용(코드에 남겨둠)
-	- retval을 누적해서 recv()가 종료되었을 때 메세지 출력
-	- gpt 동원 -> 클라이언트의 recv()를 제안하는 방식대로 10번 정도 바꿨지만 안 됨.
-	모든 방식에서 동일한 문제 발생<br>
-	![bug1-1](./img/bug2_debug1.PNG)
-	![bug1-2](./img/bug2-2_debug1.PNG)
-	![bug1-3](./img/bug2-3_debug1.PNG)
-	![bug1-4](./img/bug2-4_debug1.PNG)
+7. ~~msg = '[{}] {} : {}'.format(time.strftime('%X'), user_list[sock][0], recvData.decode('euc-kr'))에서 recvData.decode('euc-kr')만 못받음~~<br>
+	클라이언트에서 닉네임 설정할 때 문자열 끝을 알리기 위해 삽입한 \0 때문이었음.<br>
+	c는 \0로 문자열의 끝을 판단하고 그 뒤의 내용은 print하지 않기 때문에 빈 공백으로 처리하고 넘어가는 python이나 null 문자로 처리하고 넘어가는 java랑 다르게 메세지가 끝까지 출력이 안 됐던 것<br>
+	일단, 닉네임을 전달할 때 \n나 \0가 끝에 없으면 오류가 나기 때문에 recv()하고 buf에서 닉네임 끝의 \0을 따로 지워서 출력함
+	따라서, 서버나 c제외 클라이언트에게는 [시간대] 닉네임\0 : 메세지의 형태로 아직 존재.<br>
+	![bug3](./img/bug3_debug2.PNG) 
