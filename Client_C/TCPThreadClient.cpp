@@ -41,7 +41,6 @@ int main(int argc, char* argv[])
 	if (retval == SOCKET_ERROR) err_quit("connect()");
 
 	namelen = setName(name, NAMESIZE + 1, sock);
-	printf("\n[main] namelen %d", namelen);
 
 	HANDLE recvThread;
 	HANDLE sendThread;
@@ -93,7 +92,6 @@ unsigned int WINAPI ThreadSend(void* arg) {
 //recv() ½º·¹µå
 unsigned int WINAPI ThreadRecv(void* arg) {
 	SOCKET sock = *(SOCKET*)arg;
-	printf("\n[send] namelen %d", namelen);
     char buf[BUFSIZE + 1];
     int len;
 
@@ -152,8 +150,6 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 		}
 		strcat_s(check, checklen, ACCEPT);
 		strcat_s(check, checklen, name);
-		printf("\nname %s", name);
-		printf("\ncheck %s", check);
 		retval = recv(sock, name, NAMESIZE, 0);
 		if (retval == SOCKET_ERROR) {
 			err_display("recv()");
