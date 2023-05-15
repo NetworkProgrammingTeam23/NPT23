@@ -4,17 +4,16 @@
 
 #define SERVERPORT 9900
 #define BUFSIZE    1023
-#define NAMESIZE   24
+#define NAMESIZE   1024
 #define RECVSTANDARDDATE 10
 
-char* SERVERIP = (char*)"127.0.0.1";
-const char* ACCEPT = "승인";
-int namelen;
+char* SERVERIP = (char*)"127.0.0.1";	//서버 주소
+const char ACCEPT[] = "승인";			//서버 접속 승인 신호
+int namelen;							//닉네임 길이
 
-unsigned int WINAPI ThreadSend(void* arg);
-unsigned int WINAPI ThreadRecv(void* arg);
-int setName(char* name, int buffer_size, SOCKET sock);
-int recvn(SOCKET sock, char* buf, int buflen);
+unsigned int WINAPI ThreadSend(void* arg);					//send() 스레드
+unsigned int WINAPI ThreadRecv(void* arg);					//recv() 스레드
+int setName(char* name, int buffer_size, SOCKET sock);		//닉네임 설정
 
 
 int main(int argc, char* argv[])
@@ -93,7 +92,6 @@ unsigned int WINAPI ThreadSend(void* arg) {
 unsigned int WINAPI ThreadRecv(void* arg) {
 	SOCKET sock = *(SOCKET*)arg;
     char buf[BUFSIZE + 1];
-    int len;
 
     while (1) {
         memset(buf, 0, sizeof(buf));		//버퍼 초기화, buf가 0이기에 recv()가 오작동하는 것을 방지
@@ -124,8 +122,10 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 	int len = 0;
 	char check[NAMESIZE+1];
 	int checklen = sizeof(check);
+	char frashBuffer;
 
 	while (1) {
+		memset(name, 0, sizeof(name));
 		memset(check, 0, checklen);
 		printf("\n닉네임을 입력하세요 : ");
 		if (fgets(name, buffer_size, stdin) == NULL) {
@@ -136,28 +136,34 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 		//뒤의 메세지가 안 나오는 현상의 주범인 \0이지만, \n나 \0로 마지막 처리를 안 해주면 오류가 발생
 		//(python이나 java는 \0로 print 끝을 구별 안 해서(따로 문자가 있음) 무사히 출력되지만, c는 그렇지 않아서 지금껏 닉네임 뒤의 메세지가 안 나왔음
 		len = (int)strlen(name);
-		if (name[0]=='\n') {
+		if (len == 1) {
 			printf("\n공백으로 닉네임 설정은 불가능합니다.");
-			memset(name, 0, NAMESIZE+1);
-			continue;
-		}else if (name[len - 1] == '\n')
+		}
+		else if (name[len - 1] == '\n') {
+			printf("\n\0제거");
 			name[len - 1] = '\0';
 
-		retval = send(sock, name, len, 0);
-		if (retval == SOCKET_ERROR) {
-			err_display("send()");
-			return 0;
-		}
-		strcat_s(check, checklen, ACCEPT);
-		strcat_s(check, checklen, name);
-		retval = recv(sock, name, NAMESIZE, 0);
-		if (retval == SOCKET_ERROR) {
-			err_display("recv()");
-			return 0;
-		}
-		else if (strcmp(name, check) == 0) {
-			printf("\n서버에 입장했습니다.");
-			break;
+			printf("\n엔터를 한 번 더 눌러 주세요.");
+			retval = send(sock, name, len, 0);
+			if (retval == SOCKET_ERROR) {
+				err_display("send()");
+				return 0;
+			}
+
+			strcat_s(check, checklen, ACCEPT);
+			scanf_s("%c", &frashBuffer); //해당 부근에서 입력버퍼에 남은 데이터가 존재하는 걸로 추정, 트래쉬 데이터를 버리는 방식을 채택
+			strcat_s(check, checklen, name);
+
+			retval = recv(sock, name, NAMESIZE, 0);
+		
+			if (retval == SOCKET_ERROR) {
+				err_display("recv()");
+				return 0;
+			}
+			else if (strcmp(name, check) == 0) {
+				printf("\n서버에 입장했습니다.\n");
+				break;
+			}
 		}
 
 	}
