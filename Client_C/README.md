@@ -30,4 +30,4 @@
 9. quit 입력 이후 quit이라는 메세지가 다른 클라이언트에게 전달됨.
 10. quit 입력 이후 서버로부터 quit이라 쳤던 것을 일부 recv()를 받는 것으로 보임<br>
 	아래 캡처에서는 테스트로 사용된 java 클라이언트와 python 클라이언트의 화면이 존재. 
-	![bug4](./img/bug4_java&c.PNG)
+	![bug4](./img/bug4_java&c.png)
