@@ -66,6 +66,10 @@ def recv_msg(sock):
                             '{} 님의 귓속말 : {}'.format(user_list[sock][0], msg).encode('euc-kr'))
                     else:
                         sock.send('닉네임이 존재하지 않습니다.'.encode('euc-kr'))
+                elif recvData[1:] == 'member':
+                    # 접속자 리스트 출력 기능
+                    users = ' '.join(nicknames)
+                    sock.send(f'접속자 수 : {len(nicknames)}, 접속자 : {users}'.encode('euc-kr'))
                 else:
                     sock.send('잘못된 명령어입니다.'.encode('euc-kr'))
             else:
