@@ -48,13 +48,20 @@ def send_func():
 
 while True:
     nickname = input('닉네임을 입력하세요: ')
+    if not nickname:
+        # 입력 없이 엔터키 쳤을 때
+        continue
     clientSock.send(nickname.encode('euc-kr'))
     nickname_possible = clientSock.recv(1024).decode('euc-kr')
-    if nickname_possible == '승인':
-        print('서버에 입장했습니다.')
-        break
-    elif nickname_possible == '중복':
-        print('중복된 닉네임입니다. 다시 입력해주세요.')
+    if nickname_possible == '공백':
+        # 닉네임을 공백으로만 설정했을 경우
+        print('닉네임을 공백만으로 설정할 수 없습니다.')
+    else:
+        if nickname_possible == '승인':
+            print('서버에 입장했습니다.')
+            break
+        elif nickname_possible == '중복':
+            print('중복된 닉네임입니다. 다시 입력해주세요.')
 
 recv_thread = threading.Thread(target=recv_func)
 recv_thread.start()

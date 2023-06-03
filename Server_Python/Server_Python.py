@@ -52,7 +52,7 @@ def recv_msg(sock):
             recvData = recvData.decode('euc-kr')
             if recvData[0] == '/':
                 if recvData[1:] == 'quit':
-                    send_to_all('{}이(가) 나갔습니다.'.format(user_list[sock][0]))
+                    send_to_all('{} 님이 나갔습니다.'.format(user_list[sock][0]))
                     off(sock)
                     sock.close()
                     break
@@ -100,14 +100,24 @@ def recv_msg(sock):
 def handle_client(serviceSock, addr):
     print(str(addr), '에서 접속되었습니다.')
     while True:
-        nickname = serviceSock.recv(1024).decode('euc-kr')
-        # 닉네임 공백 제거
-        nickname = nickname.replace(' ', '')
-        if nickname not in nicknames:
-            serviceSock.send('승인'.encode('euc-kr'))
-            break
-        else:
-            serviceSock.send('중복'.encode('euc-kr'))
+        try:
+            nickname = serviceSock.recv(1024).decode('euc-kr')
+            # 닉네임 공백 제거
+            nickname = nickname.replace(' ', '')
+            if nickname == '':
+                # 닉네임을 공백으로만 설정했을 경우
+                serviceSock.send('공백'.encode('euc-kr'))
+            else:
+                if nickname not in nicknames:
+                    serviceSock.send('승인'.encode('euc-kr'))
+                    break
+                else:
+                    serviceSock.send('중복'.encode('euc-kr'))
+        except ConnectionResetError:
+            # 닉네임 설정 전에 접속 종료 시
+            serviceSock.close()
+            print(str(addr), '닉네임 입력 전에 접속을 종료했습니다.')
+            return
     clients.append(serviceSock)
     nicknames.append(nickname)
     user_list[serviceSock] = (nickname, addr)
