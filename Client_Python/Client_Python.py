@@ -4,7 +4,7 @@ import sys
 import os
 
 ip = '127.0.0.1'
-port = 9900
+port = 9210
 
 clientSock = socket(AF_INET, SOCK_STREAM)
 clientSock.connect((ip, port))

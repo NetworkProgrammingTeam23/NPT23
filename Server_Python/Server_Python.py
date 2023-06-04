@@ -122,7 +122,7 @@ def handle_client(serviceSock, addr):
 
 
 ip = '127.0.0.1'
-port = 9900
+port = 9210
 
 listeningSock = socket(AF_INET, SOCK_STREAM)
 listeningSock.bind((ip, port))
