@@ -14,7 +14,6 @@ def send_to_all(msg):
 
 
 def off(sock):
-    # send_to_all(user_list[sock][0]+'님이 나갔습니다.')
     nicknames.remove(user_list[sock][0])
     clients.remove(sock)
     del user_list[sock]
@@ -28,7 +27,6 @@ def send_message():
                 global server_running
                 server_running = False
                 send_to_all("서버가 종료됩니다.")  # 서버 종료 알림 메시지를 전송
-                # time.sleep(2)  # 메시지를 보낸 후에 2초 대기
                 for client in clients:  # 모든 클라이언트 소켓을 닫음
                     client.close()
                 listeningSock.close()  # 서버 소켓을 닫음
@@ -37,10 +35,6 @@ def send_message():
                 send_to_all('Server : {}'.format(msg))
         except ConnectionAbortedError:
             os._exit(0)
-
-
-# def outid_message(outid):
-#     send_to_all('{}이(가) 나갔습니다.'.format(outid))
 
 
 def recv_msg(sock):
@@ -91,10 +85,6 @@ def recv_msg(sock):
                 newsoc = clients[a - 1]
                 send_to_all('{}이(가) 나갔습니다.'.format(outid))
             break
-#        except ConnectionAbortedError:
-#            # ConnectionAbortedError 예외 처리 추가
-#            print("서버가 종료되었습니다.")
-#            break
 
 
 def handle_client(serviceSock, addr):
