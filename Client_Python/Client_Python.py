@@ -58,7 +58,7 @@ while True:
         print('닉네임을 공백만으로 설정할 수 없습니다.')
     else:
         if nickname_possible == '승인':
-            print('서버에 입장했습니다.')
+            print('서버에 입장했습니다. 명령어는 /help로 확인하세요.')
             break
         elif nickname_possible == '중복':
             print('중복된 닉네임입니다. 다시 입력해주세요.')

@@ -64,6 +64,11 @@ def recv_msg(sock):
                     # 접속자 리스트 출력 기능
                     users = ' '.join(nicknames)
                     sock.send(f'접속자 수 : {len(nicknames)}, 접속자 : {users}'.encode('euc-kr'))
+                elif recvData[1:] == 'help':
+                    help_msg = '명령어 목록\n/w [닉네임] [메시지]: 지정한 사용자에게만 메시지를 보냅니다.\n' \
+                               '/member: 현재 접속 중인 사용자 목록을 볼 수 있습니다.\n' \
+                               '/quit: 접속을 종료합니다.'
+                    sock.send(help_msg.encode('euc-kr'))
                 else:
                     sock.send('잘못된 명령어입니다.'.encode('euc-kr'))
             else:
