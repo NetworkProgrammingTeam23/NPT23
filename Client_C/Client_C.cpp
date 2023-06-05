@@ -2,7 +2,7 @@
 #include <process.h>
 #include <windows.h>
 
-#define SERVERPORT 9900
+#define SERVERPORT 9210
 #define BUFSIZE    1023
 #define NAMESIZE   1024
 #define RECVSTANDARDDATE 10
