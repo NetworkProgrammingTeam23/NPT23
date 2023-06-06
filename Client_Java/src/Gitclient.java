@@ -26,7 +26,7 @@ public class Gitclient {
                     while(clientRunning) {
                         String sendText = scanner.nextLine();
                         out.write(sendText.getBytes("EUC-KR"));
-                        if(sendText.equals("quit")) {
+                        if(sendText.equals("/quit")) {
                             clientRunning = false;
                             client.close();
                             scanner.close();
@@ -49,7 +49,7 @@ public class Gitclient {
                             break;
                         }
                         String receivedText = new String(buffer, 0, bytesReceived, "EUC-KR");
-                        if(receivedText.equals("quit")) {
+                        if(receivedText.equals("/quit")) {
                             clientRunning = false;
                             client.close();
                             System.exit(0);
