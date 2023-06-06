@@ -6,32 +6,20 @@ import os
 
 
 def send_to_all(msg):
-    """
-    모든 클라이언트에게 메시지를 전송하는 함수입니다.
-    :param msg: 전송할 메시지
-    """
     if not clients:  # 클라이언트가 없는 경우
         print("접속자가 없습니다.")
     else:
         for sock in user_list:
-            #소켓을 통해 데이터를 전송합니다. msg는 전송할 데이터를 나타내며, encode('euc-kr')를 통해 문자열을 지정한 인코딩으로 변환하여 전송합니다.
             sock.send(msg.encode('euc-kr'))
 
 
 def off(sock):
-    """
-    클라이언트 접속 종료 시 관련 정보를 삭제하는 함수입니다.
-    :param sock: 종료한 클라이언트 소켓
-    """
     nicknames.remove(user_list[sock][0])
     clients.remove(sock)
     del user_list[sock]
 
 
 def send_message():
-    """
-    서버에서 메시지를 입력받아 모든 클라이언트에게 전송하는 함수입니다.
-    """
     while True:
         try:
             msg = input()
@@ -50,13 +38,8 @@ def send_message():
 
 
 def recv_msg(sock):
-    """
-    클라이언트로부터 메시지를 수신하는 함수입니다.
-    :param sock: 수신한 클라이언트 소켓
-    """
     while True:
         try:
-            #소켓으로부터 데이터를 수신합니다. 1024는 한 번에 수신할 수 있는 최대 데이터 크기를 나타내며, 수신한 데이터는 recvData 변수에 저장됩니다.
             recvData = sock.recv(1024)
             if not recvData:
                 break
@@ -110,11 +93,6 @@ def recv_msg(sock):
 
 
 def handle_client(serviceSock, addr):
-    """
-    클라이언트의 접속을 처리하는 함수입니다.
-    :param serviceSock: 클라이언트와의 연결을 담당하는 소켓
-    :param addr: 클라이언트의 주소 정보
-    """
     print(str(addr), '에서 접속되었습니다.')
     while True:
         try:
@@ -145,11 +123,9 @@ def handle_client(serviceSock, addr):
 
 ip = '127.0.0.1'
 port = 9210
-# 소켓 생성
+
 listeningSock = socket(AF_INET, SOCK_STREAM)
-# 소켓 주소 설정
 listeningSock.bind((ip, port))
-# 연결 요청 대기 상태 설정
 listeningSock.listen(10)
 print("접속을 환영합니다.")
 
