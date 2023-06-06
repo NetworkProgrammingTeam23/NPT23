@@ -47,7 +47,7 @@ def recv_msg(sock):
             msg = '[{}] {} : {}'.format(time.strftime('%X'), user_list[sock][0], recvData.decode('euc-kr'))
             send_to_all(msg)
             print(msg)
-        except ConnectionResetError:
+        except (ConnectionResetError,ConnectionAbortedError):
             print('{}이(가) 나갔습니다.'.format(user_list[sock][0]))
             outid = user_list[sock][0]
             a=clients.index(sock)
@@ -62,10 +62,10 @@ def recv_msg(sock):
                 newsoc = clients[a-1]
                 send_to_all('{}이(가) 나갔습니다.'.format(outid))
             break
-        except ConnectionAbortedError:
-            # ConnectionAbortedError 예외 처리 추가
-            print("서버가 종료되었습니다.")
-            break
+        # except ConnectionAbortedError:
+        #     # ConnectionAbortedError 예외 처리 추가
+        #     print("서버가 종료되었습니다.")
+        #     break
 def handle_client(serviceSock, addr):
     print(str(addr), '에서 접속되었습니다.')
     while True:

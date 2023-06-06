@@ -2,17 +2,18 @@ from socket import *
 import threading
 import sys
 import os
-
+import time
 ip = '127.0.0.1'
 port = 9210
 
 clientSock = socket(AF_INET, SOCK_STREAM)
 clientSock.connect((ip, port))
 client_running = True
-
-
+send_time = 0
+received_time=0
 def recv_func():
     global client_running
+    global received_time
     while True:
         try:
             msg = clientSock.recv(1024).decode('euc-kr')
@@ -21,14 +22,18 @@ def recv_func():
                 client_running = False
                 clientSock.close()  # 서버로부터 연결 종료 메시지를 받으면 소켓을 닫습니다.
                 os._exit(0)
+            received_time = time.perf_counter()
+            elapsed_time = received_time-send_time
+            print("메시지 수신 시간: ", elapsed_time, "초")    
             print('\n' + msg)
         except (ConnectionAbortedError, ConnectionResetError, OSError):
             print("서버로부터 연결이 종료되었습니다.")
             os._exit(0)  # 프로그램을 종료합니다.
 
-
 def send_func():
+    
     while True:
+        global send_time
         try:
             if not client_running:  # 서버와의 연결이 끊어진 경우
                 print("서버와의 연결이 종료되었습니다.")
@@ -40,6 +45,7 @@ def send_func():
                     clientSock.close()
                     os._exit(0)
                 else:
+                    send_time = time.perf_counter()
                     clientSock.send(msg.encode('euc-kr'))
         except OSError:
             print("서버와의 연결이 종료되었습니다.")
