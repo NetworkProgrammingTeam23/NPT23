@@ -7,13 +7,13 @@
 #define NAMESIZE   1024
 #define RECVSTANDARDDATE 10
 
-char* SERVERIP = (char*)"127.0.0.1";	//ì„œë²„ ì£¼ì†Œ
-const char ACCEPT[] = "ìŠ¹ì¸";			//ì„œë²„ ì ‘ì† ìŠ¹ì¸ ì‹ í˜¸
-int namelen;							//ë‹‰ë„¤ì„ ê¸¸ì´
+char* SERVERIP = (char*)"127.0.0.1";	//¼­¹ö ÁÖ¼Ò
+const char ACCEPT[] = "½ÂÀÎ";			//¼­¹ö Á¢¼Ó ½ÂÀÎ ½ÅÈ£
+int namelen;							//´Ğ³×ÀÓ ±æÀÌ
 
-unsigned int WINAPI ThreadSend(void* arg);					//send() ìŠ¤ë ˆë“œ
-unsigned int WINAPI ThreadRecv(void* arg);					//recv() ìŠ¤ë ˆë“œ
-int setName(char* name, int buffer_size, SOCKET sock);		//ë‹‰ë„¤ì„ ì„¤ì •
+unsigned int WINAPI ThreadSend(void* arg);					//send() ½º·¹µå
+unsigned int WINAPI ThreadRecv(void* arg);					//recv() ½º·¹µå
+int setName(char* name, int buffer_size, SOCKET sock);		//´Ğ³×ÀÓ ¼³Á¤
 
 
 int main(int argc, char* argv[])
@@ -46,11 +46,11 @@ int main(int argc, char* argv[])
 	unsigned recvThreadID;
 	unsigned sendThreadID;
 
-	//í†µì‹ ì„ ë‹´ë‹¹í•˜ëŠ” ìŠ¤ë ˆë“œ ìƒì„±
+	//Åë½ÅÀ» ´ã´çÇÏ´Â ½º·¹µå »ı¼º
 	recvThread = (HANDLE)_beginthreadex(NULL, 0, ThreadRecv, &sock, 0, &recvThreadID);
 	sendThread = (HANDLE)_beginthreadex(NULL, 0, ThreadSend, &sock, 0, &sendThreadID);
 
-	//mainìŠ¤ë ˆë“œ ë¬´í•œ ëŒ€ê¸°, ë©”ì¸ì´ ì¢…ë£Œë˜ë©´ ë‚˜ë¨¸ì§€ ìŠ¤ë ˆë“œë„ ì¢…ë£Œë¨.
+	//main½º·¹µå ¹«ÇÑ ´ë±â, ¸ŞÀÎÀÌ Á¾·áµÇ¸é ³ª¸ÓÁö ½º·¹µåµµ Á¾·áµÊ.
 	WaitForSingleObject(recvThread, INFINITE);
 	WaitForSingleObject(sendThread, INFINITE);
 
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-//send() ìŠ¤ë ˆë“œ
+//send() ½º·¹µå
 unsigned int WINAPI ThreadSend(void* arg) {
 	SOCKET sock = *(SOCKET*)arg;
 	int len;
@@ -82,30 +82,30 @@ unsigned int WINAPI ThreadSend(void* arg) {
 			break;
 		}
 		else if (strcmp(buf, "/quit") == 0) {
-			printf("\nì„œë²„ì™€ì˜ ì—°ê²°ì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤\n");
-			exit(0);		//quitìœ¼ë¡œ ì‹ í˜¸ë¥¼ ì¤˜ì„œ recv ìŠ¤ë ˆë“œë¥¼ ì¢…ë£Œí•˜ëŠ” ë°©ì‹ì€ ëŠë ¤ì„œ í”„ë¡œì„¸ìŠ¤ë¥¼ ì¢…ë£Œì‹œí‚¤ëŠ” ë°©í–¥ìœ¼ë¡œ ê°”ìŠµë‹ˆë‹¤.
+			printf("\n¼­¹ö¿ÍÀÇ ¿¬°áÀÌ Á¾·áµÇ¾ú½À´Ï´Ù\n");
+			exit(0);		//quitÀ¸·Î ½ÅÈ£¸¦ Áà¼­ recv ½º·¹µå¸¦ Á¾·áÇÏ´Â ¹æ½ÄÀº ´À·Á¼­ ÇÁ·Î¼¼½º¸¦ Á¾·á½ÃÅ°´Â ¹æÇâÀ¸·Î °¬½À´Ï´Ù.
 		}
 	}
 }
 
-//recv() ìŠ¤ë ˆë“œ
+//recv() ½º·¹µå
 unsigned int WINAPI ThreadRecv(void* arg) {
 	SOCKET sock = *(SOCKET*)arg;
     char buf[BUFSIZE + 1];
 
     while (1) {
-        memset(buf, 0, sizeof(buf));		//ë²„í¼ ì´ˆê¸°í™”, bufê°€ 0ì´ê¸°ì— recv()ê°€ ì˜¤ì‘ë™í•˜ëŠ” ê²ƒì„ ë°©ì§€
+        memset(buf, 0, sizeof(buf));		//¹öÆÛ ÃÊ±âÈ­, buf°¡ 0ÀÌ±â¿¡ recv()°¡ ¿ÀÀÛµ¿ÇÏ´Â °ÍÀ» ¹æÁö
         int retval = recv(sock, buf, BUFSIZE, 0);
         if (retval == SOCKET_ERROR) {
             err_display("recv()");
             break;
         }
         else if (retval == 0) {
-            printf("\nì„œë²„ë¡œë¶€í„° ì—°ê²°ì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
+            printf("\n¼­¹ö·ÎºÎÅÍ ¿¬°áÀÌ Á¾·áµÇ¾ú½À´Ï´Ù.");
             break;
         }
         else {
-			//ë”°ë¼ì„œ recv()ë¥¼ ì‹¤í–‰í•œ ë²„í¼ì—ì„œ ë‹‰ë„¤ì„ ë’¤ì˜ \0ì„ ì§€ì›Œ ë‚˜ë¨¸ì§€ ë¬¸ì¥ë„ ì¶œë ¥
+			//µû¶ó¼­ recv()¸¦ ½ÇÇàÇÑ ¹öÆÛ¿¡¼­ ´Ğ³×ÀÓ µÚÀÇ \0À» Áö¿ö ³ª¸ÓÁö ¹®Àåµµ Ãâ·Â
 			if (buf[namelen + RECVSTANDARDDATE] == '\0') {
 				buf[namelen + RECVSTANDARDDATE] = ' ';
 			}
@@ -116,7 +116,7 @@ unsigned int WINAPI ThreadRecv(void* arg) {
     return 0;
 }
 
-//ë‹‰ë„¤ì„ ì„¤ì • í•¨ìˆ˜
+//´Ğ³×ÀÓ ¼³Á¤ ÇÔ¼ö
 int setName(char* name, int buffer_size, SOCKET sock) {
 	int retval;
 	int len = 0;
@@ -127,20 +127,20 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 	while (1) {
 		memset(name, 0, sizeof(name));
 		memset(check, 0, checklen);
-		printf("\në‹‰ë„¤ì„ì„ ì…ë ¥í•˜ì„¸ìš” : ");
+		printf("\n´Ğ³×ÀÓÀ» ÀÔ·ÂÇÏ¼¼¿ä : ");
 		if (fgets(name, buffer_size, stdin) == NULL) {
-			printf("\n[ì˜¤ë¥˜] fgetsì˜ ë¦¬í„´ê°’ì´ NULLì…ë‹ˆë‹¤..");
+			printf("\n[¿À·ù] fgetsÀÇ ¸®ÅÏ°ªÀÌ NULLÀÔ´Ï´Ù..");
 			break;
 		}
 
-		//ë’¤ì˜ ë©”ì„¸ì§€ê°€ ì•ˆ ë‚˜ì˜¤ëŠ” í˜„ìƒì˜ ì£¼ë²”ì¸ \0ì´ì§€ë§Œ, \në‚˜ \0ë¡œ ë§ˆì§€ë§‰ ì²˜ë¦¬ë¥¼ ì•ˆ í•´ì£¼ë©´ ì˜¤ë¥˜ê°€ ë°œìƒ
-		//(pythonì´ë‚˜ javaëŠ” \0ë¡œ print ëì„ êµ¬ë³„ ì•ˆ í•´ì„œ(ë”°ë¡œ ë¬¸ìê°€ ìˆìŒ) ë¬´ì‚¬íˆ ì¶œë ¥ë˜ì§€ë§Œ, cëŠ” ê·¸ë ‡ì§€ ì•Šì•„ì„œ ì§€ê¸ˆê» ë‹‰ë„¤ì„ ë’¤ì˜ ë©”ì„¸ì§€ê°€ ì•ˆ ë‚˜ì™”ìŒ
+		//µÚÀÇ ¸Ş¼¼Áö°¡ ¾È ³ª¿À´Â Çö»óÀÇ ÁÖ¹üÀÎ \0ÀÌÁö¸¸, \n³ª \0·Î ¸¶Áö¸· Ã³¸®¸¦ ¾È ÇØÁÖ¸é ¿À·ù°¡ ¹ß»ı
+		//(pythonÀÌ³ª java´Â \0·Î print ³¡À» ±¸º° ¾È ÇØ¼­(µû·Î ¹®ÀÚ°¡ ÀÖÀ½) ¹«»çÈ÷ Ãâ·ÂµÇÁö¸¸, c´Â ±×·¸Áö ¾Ê¾Æ¼­ Áö±İ²¯ ´Ğ³×ÀÓ µÚÀÇ ¸Ş¼¼Áö°¡ ¾È ³ª¿ÔÀ½
 		len = (int)strlen(name);
 		if (len == 1) {
-			printf("\nê³µë°±ìœ¼ë¡œ ë‹‰ë„¤ì„ ì„¤ì •ì€ ë¶ˆê°€ëŠ¥í•©ë‹ˆë‹¤.");
+			printf("\n°ø¹éÀ¸·Î ´Ğ³×ÀÓ ¼³Á¤Àº ºÒ°¡´ÉÇÕ´Ï´Ù.");
 		}
 		else if (name[len - 1] == '\n') {
-			printf("\n\0ì œê±°");
+			printf("\n\0Á¦°Å");
 			name[len - 1] = '\0';
 			len = (int)strlen(name);
 
@@ -157,11 +157,11 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 				return 0;
 			}
 			else if (strcmp(check, ACCEPT) == 0) {
-				printf("\nì„œë²„ì— ì…ì¥í–ˆìŠµë‹ˆë‹¤.\n");
+				printf("\n¼­¹ö¿¡ ÀÔÀåÇß½À´Ï´Ù.\n");
 				break;
 			}
-			else if (strcmp(check, "ì¤‘ë³µ") == 0) {
-				printf("ì¤‘ë³µëœ ë‹‰ë„¤ì„ì…ë‹ˆë‹¤. ë‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.\n");
+			else if (strcmp(check, "Áßº¹") == 0) {
+				printf("Áßº¹µÈ ´Ğ³×ÀÓÀÔ´Ï´Ù. ´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.\n");
 			}
 		}
 
