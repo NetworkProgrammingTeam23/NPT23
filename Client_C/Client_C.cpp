@@ -144,16 +144,11 @@ int setName(char* name, int buffer_size, SOCKET sock) {
 			name[len - 1] = '\0';
 			len = (int)strlen(name);
 
-			//printf("\n엔터를 한 번 더 눌러 주세요.");
 			retval = send(sock, name, len, 0);
 			if (retval == SOCKET_ERROR) {
 				err_display("send()");
 				return 0;
 			}
-
-			//strcat_s(check, checklen, ACCEPT);
-			//scanf_s("%c", &frashBuffer); //해당 부근에서 입력버퍼에 남은 데이터가 존재하는 걸로 추정, 트래쉬 데이터를 버리는 방식을 채택
-			//strcat_s(check, checklen, name);
 
 			retval = recv(sock, check, NAMESIZE, 0);
 		
